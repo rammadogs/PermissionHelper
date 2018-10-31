@@ -9,6 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,8 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionHelper implements OnActivityPermissionCallback {
+    public static final String NO_BATTERY_OPTIMISATION = "NO_BATTERY_OPTIMISATION";
+
     private static final int OVERLAY_PERMISSION_REQ_CODE = 2;
     private static final int NOTIFICATION_ACCESS_REQ_CODE = 3;
+    private static final int BATTERY_OPTIMISATION_REQ_CODE = 3;
     private static final int REQUEST_PERMISSIONS = 1;
 
     @NonNull private final OnPermissionCallback permissionCallback;
@@ -93,10 +97,17 @@ public class PermissionHelper implements OnActivityPermissionCallback {
                 } else {
                     permissionCallback.onPermissionDeclined(new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY});
                 }
+            } else if(requestCode == BATTERY_OPTIMISATION_REQ_CODE) {
+                if(isNoBatteryOptimisationPolicyGranted()) {
+                    permissionCallback.onPermissionGranted(new String[]{NO_BATTERY_OPTIMISATION});
+                } else {
+                    permissionCallback.onPermissionDeclined(new String[]{NO_BATTERY_OPTIMISATION});
+                }
             }
         } else {
             permissionCallback.onPermissionPreGranted(Manifest.permission.SYSTEM_ALERT_WINDOW);
             permissionCallback.onPermissionPreGranted(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
+            permissionCallback.onPermissionPreGranted(NO_BATTERY_OPTIMISATION);
         }
     }
 
@@ -164,6 +175,21 @@ public class PermissionHelper implements OnActivityPermissionCallback {
         }
     }
 
+    public void requestNoBatteryOptimisationPolicy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                if (!isNoBatteryOptimisationPolicyGranted()) {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    context.startActivityForResult(intent, BATTERY_OPTIMISATION_REQ_CODE);
+                } else {
+                    permissionCallback.onPermissionPreGranted(NO_BATTERY_OPTIMISATION);
+                }
+            } catch (Exception ignored) {}
+        } else {
+            permissionCallback.onPermissionPreGranted(NO_BATTERY_OPTIMISATION);
+        }
+    }
+
     /**
      * internal usage.
      */
@@ -174,6 +200,8 @@ public class PermissionHelper implements OnActivityPermissionCallback {
                 requestSystemAlertPermission();
             } else if(permissionName.equalsIgnoreCase(Manifest.permission.ACCESS_NOTIFICATION_POLICY)) {
                 requestActionNotificationPolicy();
+            } else if(permissionName.equalsIgnoreCase(NO_BATTERY_OPTIMISATION)) {
+                requestNoBatteryOptimisationPolicy();
             } else {
                 if (isPermissionDeclined(permissionName)) {
                     if (isExplanationNeeded(permissionName)) {
@@ -316,12 +344,26 @@ public class PermissionHelper implements OnActivityPermissionCallback {
         return isActionNotificationPolicyGranted(context);
     }
 
+    public boolean isNoBatteryOptimisationPolicyGranted() {
+        return isNoBatteryOptimisationPolicyGranted(context);
+    }
+
     /**
      * @return true if notification fiddling is granted
      */
     public static boolean isActionNotificationPolicyGranted(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).isNotificationPolicyAccessGranted();
+        }
+        return true;
+    }
+
+    public static boolean isNoBatteryOptimisationPolicyGranted(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            if(powerManager == null)
+                return false;
+            return powerManager.isIgnoringBatteryOptimizations(context.getApplicationContext().getPackageName());
         }
         return true;
     }

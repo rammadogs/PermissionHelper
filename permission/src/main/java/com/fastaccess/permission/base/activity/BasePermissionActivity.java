@@ -265,6 +265,8 @@ public abstract class BasePermissionActivity extends AppCompatActivity implement
                             permissionHelper.requestSystemAlertPermission();
                         } else if(model.getPermissionName().equalsIgnoreCase(Manifest.permission.ACCESS_NOTIFICATION_POLICY)) {
                             permissionHelper.requestActionNotificationPolicy();
+                        }  else if(model.getPermissionName().equalsIgnoreCase(PermissionHelper.NO_BATTERY_OPTIMISATION)) {
+                            permissionHelper.requestNoBatteryOptimisationPolicy();
                         } else {
                             permissionHelper.requestAfterExplanation(model.getPermissionName());
                         }
