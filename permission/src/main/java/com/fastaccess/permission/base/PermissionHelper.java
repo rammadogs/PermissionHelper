@@ -194,7 +194,7 @@ public class PermissionHelper implements OnActivityPermissionCallback {
      * internal usage.
      */
     private void handleSingle(@NonNull String permissionName) {
-        if (permissionExists(permissionName)) {// android M throws exception when requesting
+        if (permissionExists(permissionName) || permissionName.equalsIgnoreCase(NO_BATTERY_OPTIMISATION)) {// android M throws exception when requesting
             // run time permission that does not exists in AndroidManifest.
             if (permissionName.equalsIgnoreCase(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
                 requestSystemAlertPermission();

@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.fastaccess.permission.base.PermissionHelper;
 import com.fastaccess.permission.base.activity.BasePermissionActivity;
 import com.fastaccess.permission.base.model.PermissionModel;
 import com.fastaccess.permission.base.model.PermissionModelBuilder;
@@ -34,9 +35,9 @@ public class SamplePagerActivity extends BasePermissionActivity {
                 .build());
 
         permissions.add(PermissionModelBuilder.withContext(this)
-                .withCanSkip(true)
+                .withCanSkip(false)
                 .withTitle("meow")
-                .withPermissionName(Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+                .withPermissionName(PermissionHelper.NO_BATTERY_OPTIMISATION)
                 .withMessage("meow")
                 .withExplanationMessage("meow")
                 .withFontType("my_font.ttf")
