@@ -27,7 +27,7 @@ public class PermissionHelper implements OnActivityPermissionCallback {
 
     private static final int OVERLAY_PERMISSION_REQ_CODE = 2;
     private static final int NOTIFICATION_ACCESS_REQ_CODE = 3;
-    private static final int BATTERY_OPTIMISATION_REQ_CODE = 3;
+    private static final int BATTERY_OPTIMISATION_REQ_CODE = 4;
     private static final int REQUEST_PERMISSIONS = 1;
 
     @NonNull private final OnPermissionCallback permissionCallback;
