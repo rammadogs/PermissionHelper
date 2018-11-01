@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionHelper implements OnActivityPermissionCallback {
-    public static final String NO_BATTERY_OPTIMISATION = "NO_BATTERY_OPTIMISATION";
 
     private static final int OVERLAY_PERMISSION_REQ_CODE = 2;
     private static final int NOTIFICATION_ACCESS_REQ_CODE = 3;
@@ -99,15 +98,15 @@ public class PermissionHelper implements OnActivityPermissionCallback {
                 }
             } else if(requestCode == BATTERY_OPTIMISATION_REQ_CODE) {
                 if(isNoBatteryOptimisationPolicyGranted()) {
-                    permissionCallback.onPermissionGranted(new String[]{NO_BATTERY_OPTIMISATION});
+                    permissionCallback.onPermissionGranted(new String[]{Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS});
                 } else {
-                    permissionCallback.onPermissionDeclined(new String[]{NO_BATTERY_OPTIMISATION});
+                    permissionCallback.onPermissionDeclined(new String[]{Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS});
                 }
             }
         } else {
             permissionCallback.onPermissionPreGranted(Manifest.permission.SYSTEM_ALERT_WINDOW);
             permissionCallback.onPermissionPreGranted(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
-            permissionCallback.onPermissionPreGranted(NO_BATTERY_OPTIMISATION);
+            permissionCallback.onPermissionPreGranted(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
         }
     }
 
@@ -179,14 +178,15 @@ public class PermissionHelper implements OnActivityPermissionCallback {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
                 if (!isNoBatteryOptimisationPolicyGranted()) {
-                    Intent intent = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setData(Uri.parse("package:" + context.getApplicationContext().getPackageName()));
                     context.startActivityForResult(intent, BATTERY_OPTIMISATION_REQ_CODE);
                 } else {
-                    permissionCallback.onPermissionPreGranted(NO_BATTERY_OPTIMISATION);
+                    permissionCallback.onPermissionPreGranted(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 }
             } catch (Exception ignored) {}
         } else {
-            permissionCallback.onPermissionPreGranted(NO_BATTERY_OPTIMISATION);
+            permissionCallback.onPermissionPreGranted(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
         }
     }
 
@@ -194,13 +194,13 @@ public class PermissionHelper implements OnActivityPermissionCallback {
      * internal usage.
      */
     private void handleSingle(@NonNull String permissionName) {
-        if (permissionExists(permissionName) || permissionName.equalsIgnoreCase(NO_BATTERY_OPTIMISATION)) {// android M throws exception when requesting
+        if (permissionExists(permissionName) || permissionName.equalsIgnoreCase(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {// android M throws exception when requesting
             // run time permission that does not exists in AndroidManifest.
             if (permissionName.equalsIgnoreCase(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
                 requestSystemAlertPermission();
             } else if(permissionName.equalsIgnoreCase(Manifest.permission.ACCESS_NOTIFICATION_POLICY)) {
                 requestActionNotificationPolicy();
-            } else if(permissionName.equalsIgnoreCase(NO_BATTERY_OPTIMISATION)) {
+            } else if(permissionName.equalsIgnoreCase(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
                 requestNoBatteryOptimisationPolicy();
             } else {
                 if (isPermissionDeclined(permissionName)) {
